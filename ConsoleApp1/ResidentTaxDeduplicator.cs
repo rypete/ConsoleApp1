@@ -14,20 +14,18 @@ public class ResidentTaxDeduplicator
         {
             count += 1;
             string Key = CreateKey(currentTax);
-            bool nonResidentialTaxExists = nonResidentialTaxes.TryGetValue(Key, out TaxItem nonResidentialTax);
-
-            // Cheap shot - lets check if we get lucky and the nonResidential half has already been processed.
-            if (nonResidentialTaxExists)
-            {
-                currentTax.NonResidentRate = nonResidentialTax.Rate;
-                nonResidentialTaxes.Remove(Key);
-                mergedTaxes.Add(Key, currentTax);
-
-                continue;
-            }
 
             if (currentTax.IsResidentTax)
             {
+                bool nonResidentialTaxExists = nonResidentialTaxes.TryGetValue(Key, out TaxItem nonResidentialTax);
+
+                // Cheap shot - lets check if we get lucky and the nonResidential half has already been processed.
+                if (nonResidentialTaxExists)
+                {
+                    currentTax.NonResidentRate = nonResidentialTax.Rate;
+                    nonResidentialTaxes.Remove(Key);
+                }
+
                 mergedTaxes.Add(Key, currentTax);
             }
             else
