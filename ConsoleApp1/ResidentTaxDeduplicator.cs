@@ -17,20 +17,22 @@ public class ResidentTaxDeduplicator
 
             if (currentTax.IsResidentTax)
             {
-                bool nonResidentialTaxExists = nonResidentialTaxes.TryGetValue(Key, out TaxItem nonResidentialTax);
-
-                // Cheap shot - lets check if we get lucky and the nonResidential half has already been processed.
-                if (nonResidentialTaxExists)
-                {
-                    currentTax.NonResidentRate = nonResidentialTax.Rate;
-                    nonResidentialTaxes.Remove(Key);
-                }
-
                 mergedTaxes.Add(Key, currentTax);
             }
             else
             {
-                nonResidentialTaxes.Add(Key, currentTax);
+                // Cheap shot - check if the residential half has already been processed.
+                bool residentialTaxExists = mergedTaxes.TryGetValue(Key, out TaxItem residentialTax);
+
+                if (residentialTaxExists)
+                {
+                    residentialTax.NonResidentRate = currentTax.Rate;
+                }
+                else
+                {
+                    nonResidentialTaxes.Add(Key, currentTax);
+                }
+
             }
         }
 
@@ -46,13 +48,14 @@ public class ResidentTaxDeduplicator
             if (residentialTaxExists)
             {
                 residentialTax.NonResidentRate = currentTax.Rate;
-            } else
+            }
+            else
             {
                 mergedTaxes.Add(Key, currentTax);
             }
         }
 
-        Console.WriteLine("Operations: "+ count);
+        Console.WriteLine("Operations: " + count);
         Console.WriteLine("Count End: " + mergedTaxes.Count);
 
         return mergedTaxes.Values;
